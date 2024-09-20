@@ -7,3 +7,7 @@ jbasher2 is a (somewhat esoteric) programming language based on jbasher, another
 
 - version 091924-private
     - original commit
+- version 092024-private
+    - added a few more commands like repeat, ask for input and parse
+    - added more error messages
+    - fixed a small amount of bugs

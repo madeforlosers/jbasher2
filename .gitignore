@@ -1,5 +1,6 @@
 test.jb2
+storage.jb2
+test.js
 package-lock.json
 package.json
 node_modules/
-tests/

@@ -1,0 +1,20 @@
+create x with type number
+create y with type number
+spawn 19
+set that to x
+while x > 2
+    modulo x by 2
+    set that to y
+    if y == 0
+        divide x by 2
+        set that to x
+    endif
+    if y == 1
+        multiply x by 3
+        add that by 1
+        set that to x
+    endif
+    output x
+endwhile
+output ""
+output "done"

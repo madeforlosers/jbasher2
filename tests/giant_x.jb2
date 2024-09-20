@@ -1,0 +1,65 @@
+create i with type number
+set 0 to i
+create m with type number
+ask for input
+parse that as int
+set that to m
+create n with type number
+set 1 to n
+create u with type number
+set m to u
+create l with type number
+set 2 to l
+while l != 0
+    if u != 0
+        if l  1
+            create f with type string
+            set "/" to f
+            create b with type string
+            set "\" to b
+        endif
+        create t with type number
+        set 1 to t
+        while t > 0
+            repeat " " an i amount of times
+            output inline that
+            output inline b
+            subtract u by i
+            multiply that by 2
+            subtract that by 1
+            repeat " " an that amount of times
+            output inline that
+            output f
+            add n by i
+            set that to i
+            if l > 1
+                if i >= m
+                    set 0 to t
+                endif
+            endif
+            if l < 2
+                if i <= m
+                    set 0 to t
+                endif
+            endif
+        endwhile
+    endif
+    subtract i by 1
+    set that to i
+    subtract l by 1
+    set that to l
+    if l != 0
+        repeat " " an m amount of times
+        output inline that
+        output "X"
+        if m != 0
+            subtract 0 by 1
+            set that to m
+            set m to n
+            create e with type string
+            set b to e
+            set f to b
+            set e to f
+        endif
+    endif
+endwhile
