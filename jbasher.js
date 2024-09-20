@@ -276,7 +276,7 @@ for(let i = 0; i < file.length; i++){
     if(command.match(/^repeat \"?.+\"? an \"?[0-9A-z]+\"? amount of times$/g) != null){
         let string = command.split(/^repeat\s/g)[1].split(/\san\s/g)[0];
         let amount = command.split(/an\s/g)[1].split(/\samount of times$/g)[0];
-        if(transformToUsable(amount,false,true) < 1){
+        if(transformToUsable(amount,false,true) < 0){
             throwError(5,i);
         }
         vars.that.type = "string";

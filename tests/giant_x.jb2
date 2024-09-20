@@ -12,7 +12,7 @@ create l with type number
 set 2 to l
 while l != 0
     if u != 0
-        if l  1
+        if l > 1
             create f with type string
             set "/" to f
             create b with type string
