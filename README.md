@@ -1,5 +1,5 @@
 # jbasher2
-### *version 091924-private*
+### *version 092324-public*
 jbasher2 is a (somewhat esoteric) programming language based on jbasher, another programming language i made
 
 
