@@ -15,3 +15,5 @@ jbasher2 is a (somewhat esoteric) programming language based on jbasher, another
     - fixed small bug in tests/ and in jbasher.js
 - version 092324-public
     - added some string manipulation tools
+- version 092324:1056-public
+    - added semicolons to lines that didn't have them

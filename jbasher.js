@@ -31,36 +31,36 @@ function throwError(number, im = -1) {
             `At line ${im + 1}: \n${file[im]}`
             :
             `Line wasn't found.`)
-    )
+    );
     process.exit();
 }
 function detectType(itemtemp) {
     let item = itemtemp.toString();
     if (item.match(/[0-9]+/g) != null) {
-        return "number"
+        return "number";
     }
     if (item.match(/[A-z\s\/\\]+/g) != null && item.includes("\"")) {
         return "string";
     }
     if (item.match(/[A-z]+/g) != null && !item.includes("\"")) {
-        return "variable"
+        return "variable";
     }
     throwError(-8);
-    return "undefined"
+    return "undefined";
 }
 function detectTypeExcludeVariable(itemtemp) {
     let item = itemtemp.toString();
     if (item.match(/[0-9]+/g) != null) {
-        return "number"
+        return "number";
     }
     if (item.match(/[A-z]+/g) != null && item.includes("\"")) {
         return "string";
     }
     if (item.match(/[A-z]+/g) != null && !item.includes("\"")) {
-        return vars[item].type
+        return vars[item].type;
     }
     throwError(-8);
-    return "undefined"
+    return "undefined";
 }
 function transformToUsable(item, keepQuotes = false, dontcleartemp = false) {
     if (detectType(item) == "variable") {
@@ -101,7 +101,7 @@ for (let i = 0; i < file.length; i++) {
         }
         if (command.match(/^spawn \"?[0-9A-z]+\"?$/g)) {
             let item = command.split(/^spawn /g)[1];
-            let type = detectTypeExcludeVariable(item)
+            let type = detectTypeExcludeVariable(item);
             vars.that.type = type;
             vars.that.item = transformToUsable(item);
         }
@@ -184,7 +184,7 @@ for (let i = 0; i < file.length; i++) {
             let j = i + 1;
             for (; file[j] != "endif" || layers != 0; j++) {
                 if (j >= file.length) {
-                    throwError(4, i)
+                    throwError(4, i);
                 }
                 if (file[j].split(" ")[0] == "if") {
                     layers += 1;
@@ -208,10 +208,10 @@ for (let i = 0; i < file.length; i++) {
             let v = transformToUsable(command.split("get item from ")[1].split(" at ")[0], false, true);
             let at = transformToUsable(command.split(" at ")[1], false, true);
             if (typeof v != "string") {
-                throwError(1, i)
+                throwError(1, i);
             }
             if (typeof at != "number") {
-                throwError(1, i)
+                throwError(1, i);
             }
             vars.that.type = "string";
             vars.that.item = v[at];
@@ -219,7 +219,7 @@ for (let i = 0; i < file.length; i++) {
         if (command.match(/^get length of \"?[0-9A-z]+\"?$/g) != null) {
             let v = command.split("get length of ")[1];
             if (detectTypeExcludeVariable(v) != "string") {
-                throwError(1, i)
+                throwError(1, i);
             }
             vars.that.type = "number";
             vars.that.item = vars[v]["item"].length;
@@ -228,7 +228,7 @@ for (let i = 0; i < file.length; i++) {
             let v = transformToUsable(command.split("turn ")[1].split(" into")[0], false, true);
             let result = command.split("into ")[1];
             if (typeof v != "string") {
-                throwError(1, i)
+                throwError(1, i);
             }
             vars.that.type = "string";
             vars.that.item = result == "uppercase" ? v.toUpperCase() : v.toLowerCase();
@@ -236,15 +236,15 @@ for (let i = 0; i < file.length; i++) {
         if (command.match(/^get case of \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get case of ")[1], false, true);
             if (typeof v != "string") {
-                throwError(1, i)
+                throwError(1, i);
             }
             vars.that.type = "string";
             if (v == v.toUpperCase()) {
-                vars.that.item = "uppercase"
+                vars.that.item = "uppercase";
             } else if (v == v.toLowerCase()) {
-                vars.that.item = "lowercase"
+                vars.that.item = "lowercase";
             } else {
-                vars.that.item = "mixed"
+                vars.that.item = "mixed";
             }
         }
         if (command.match(/^get location of \"?[0-9A-z]+\"? inside \"?[0-9A-z]+\"?$/g) != null) {
@@ -257,9 +257,9 @@ for (let i = 0; i < file.length; i++) {
             vars.that.item = ins.indexOf(it);
         }
         if (command.match(/^parse \"?[0-9A-z]+\"? as int$/g) != null) {
-            let toInt = command.split("parse ")[1].split(" as int")[0]
+            let toInt = command.split("parse ")[1].split(" as int")[0];
             vars.that.type = "number";
-            vars.that.item = parseInt(transformToUsable(toInt, false, true))
+            vars.that.item = parseInt(transformToUsable(toInt, false, true));
         }
         if (command.match(/^while \"?[0-9A-z]+\"?\s(\>\=?|\<\=?|\!\=|\=\=)\s\"?[0-9A-z]+\"?$/g) != null) {
             let compare1 = command.split("while ")[1].split(/\s(\>\=?|\<\=?|\!\=|\=\=)\s/g)[0];
@@ -269,7 +269,7 @@ for (let i = 0; i < file.length; i++) {
             let j = i + 1;
             for (; file[j] != "endwhile" || layers != 0; j++) {
                 if (j >= file.length) {
-                    throwError(4, i)
+                    throwError(4, i);
                 }
                 if (file[j].split(" ")[0] == "while") {
                     layers += 1;
@@ -279,7 +279,7 @@ for (let i = 0; i < file.length; i++) {
                 }
             }
             if (whileLayers.length < 1 || whileLayers[whileLayers.length - 1][0] != i) {
-                whileLayers.push([i, j])
+                whileLayers.push([i, j]);
             }
             if (eval(`!(${transformToUsable(compare1)}${comparator}${transformToUsable(compare2)})`)) {
                 i = j;
@@ -289,7 +289,7 @@ for (let i = 0; i < file.length; i++) {
         }
         if (command.match(/^endwhile$/g) != null) {
             if (whileLayers.length == 0) {
-                throwError(4, i)
+                throwError(4, i);
             }
             i = whileLayers[whileLayers.length - 1][0] - 1;
             continue;
@@ -310,7 +310,7 @@ for (let i = 0; i < file.length; i++) {
         }
         if (command.match(/^output\s((type|inline)\s)?\"?[0-9A-z\s]+\"?$/g) != null) {
             if (command.match(/^output type\s/g) != null) {
-                console.log(detectTypeExcludeVariable(command.split(/^output type\s/g)[1]))
+                console.log(detectTypeExcludeVariable(command.split(/^output type\s/g)[1]));
             } else if (command.match(/^output inline\s/g) != null) {
                 let item = command.split(/^output inline\s/g)[1];
                 process.stdout.write(transformToUsable(item));
@@ -322,6 +322,6 @@ for (let i = 0; i < file.length; i++) {
     } catch (e) {
         console.log(vars);
         console.log(e);
-        throwError(0, i)
+        throwError(0, i);
     }
 }
