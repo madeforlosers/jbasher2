@@ -13,3 +13,5 @@ jbasher2 is a (somewhat esoteric) programming language based on jbasher, another
     - fixed a small amount of bugs
 - version 092024:1248-private
     - fixed small bug in tests/ and in jbasher.js
+- version 092324-public
+    - added some string manipulation tools
