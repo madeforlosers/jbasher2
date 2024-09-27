@@ -17,3 +17,6 @@ jbasher2 is a (somewhat esoteric) programming language based on jbasher, another
     - added some string manipulation tools
 - version 092324:1242-public
     - fixed up some things and had a huge fuss with git (im not good with this)
+- version 092724-public
+    - added a new command - parse as char
+    - fixed output problems
