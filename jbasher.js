@@ -81,6 +81,7 @@ function transformToUsable(item, keepQuotes = false, dontcleartemp = false) {
     }
     return item;
 }
+//console.time("debug");
 for (let i = 0; i < file.length; i++) {
     try {
         if (i >= file.length) {
@@ -261,6 +262,11 @@ for (let i = 0; i < file.length; i++) {
             vars.that.type = "number";
             vars.that.item = parseInt(transformToUsable(toInt, false, true));
         }
+        if (command.match(/^parse \"?[0-9A-z]+\"? as char$/g) != null) {
+            let toInt = command.split("parse ")[1].split(" as char")[0];
+            vars.that.type = "string";
+            vars.that.item = String.fromCharCode(transformToUsable(toInt, false, true));
+        }
         if (command.match(/^while \"?[0-9A-z]+\"?\s(\>\=?|\<\=?|\!\=|\=\=)\s\"?[0-9A-z]+\"?$/g) != null) {
             let compare1 = command.split("while ")[1].split(/\s(\>\=?|\<\=?|\!\=|\=\=)\s/g)[0];
             let compare2 = command.split(/(\>\=?|\<\=?|\!\=|\=\=)\s/g)[2];
@@ -308,7 +314,7 @@ for (let i = 0; i < file.length; i++) {
             vars.that.type = "string";
             vars.that.item = transformToUsable(string, false, true).repeat(transformToUsable(amount, false, true));
         }
-        if (command.match(/^output\s((type|inline)\s)?\"?[0-9A-z\s]+\"?$/g) != null) {
+        if (command.match(/^output\s((type|inline)\s)?\"?.+\"?$/g) != null) {
             if (command.match(/^output type\s/g) != null) {
                 console.log(detectTypeExcludeVariable(command.split(/^output type\s/g)[1]));
             } else if (command.match(/^output inline\s/g) != null) {
@@ -325,3 +331,4 @@ for (let i = 0; i < file.length; i++) {
         throwError(0, i);
     }
 }
+//console.timeEnd("debug");
