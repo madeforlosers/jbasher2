@@ -325,6 +325,18 @@ for (let i = 0; i < file.length; i++) {
                 console.log(transformToUsable(item));
             }
         }
+        if (command.match(/^spawn random number between \"?[0-9A-z]+\"? and \"?[0-9A-z]+\"?$/g) != null) {
+            let first = command.split("between ")[1].split(" and")[0];
+            let second = command.split("and ")[1];
+            if (detectTypeExcludeVariable(first) != "number" || detectTypeExcludeVariable(second) != "number") {
+                throwError(1, i);
+            }
+            let minCeiled = Math.ceil(transformToUsable(first, false, true));
+            let maxFloored = Math.floor(transformToUsable(second, false, true));
+            let mathed = Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
+            vars.that.type = "number";
+            vars.that.item = mathed;
+        }
     } catch (e) {
         console.log(vars);
         console.log(e);
