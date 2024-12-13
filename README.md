@@ -22,3 +22,5 @@ jbasher2 is a (somewhat esoteric) programming language based on jbasher, another
     - fixed output problems
 - version 121324-public
     - added new command - spawn random number
+- version 121324:1145-public
+    - added list functionality!

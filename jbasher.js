@@ -95,10 +95,10 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             let type = command.split("with type ")[1];
-            if (!["number", "string"].includes(type)) {
+            if (!["number", "string","list"].includes(type)) {
                 throwError(6, i);
             }
-            vars[name] = { type: type, item: null, isConstant: false };
+            vars[name] = { type: type, item: type=="list"?[]:null, isConstant: false };
         }
         if (command.match(/^spawn \"?[0-9A-z]+\"?$/g)) {
             let item = command.split(/^spawn /g)[1];
@@ -208,13 +208,13 @@ for (let i = 0; i < file.length; i++) {
         if (command.match(/^get item from \"?[0-9A-z\s\/\\]+\"? at \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get item from ")[1].split(" at ")[0], false, true);
             let at = transformToUsable(command.split(" at ")[1], false, true);
-            if (typeof v != "string") {
+            if (!["string","object"].includes(typeof v)) {
                 throwError(1, i);
             }
             if (typeof at != "number") {
                 throwError(1, i);
             }
-            vars.that.type = "string";
+            vars.that.type = typeof v=="object"?"number":"string";
             vars.that.item = v[at];
         }
         if (command.match(/^get length of \"?[0-9A-z]+\"?$/g) != null) {
@@ -336,6 +336,26 @@ for (let i = 0; i < file.length; i++) {
             let mathed = Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
             vars.that.type = "number";
             vars.that.item = mathed;
+        }
+        if (command.match(/^push \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
+            let first = command.split("push ")[1].split(" to")[0];
+            let second = command.split("to ")[1];
+            if (detectTypeExcludeVariable(first) != "number" || detectTypeExcludeVariable(second) != "list") {
+                throwError(1, i);
+            }
+            vars.that.type = "list";
+            vars.that.item = [...transformToUsable(second,false,true),transformToUsable(first,false,true)];
+        }
+        if (command.match(/^change item in \"?[0-9A-z]+\"? at index \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
+            let first = command.split("in ")[1].split(" at")[0];
+            let second = command.split("index ")[1].split(" to")[0];
+            let third = command.split("to ")[1]
+            if (detectTypeExcludeVariable(first) != "list" || detectTypeExcludeVariable(second) != "number" || detectTypeExcludeVariable(third) != "number") {
+                throwError(1, i);
+            }
+            vars.that.type = "list";
+            vars.that.item = transformToUsable(first,false,true);
+            vars.that.item[transformToUsable(second,false,true)] = transformToUsable(third,false,true);
         }
     } catch (e) {
         console.log(vars);
