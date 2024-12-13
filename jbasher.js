@@ -205,7 +205,7 @@ for (let i = 0; i < file.length; i++) {
             vars.that.type = "string";
             vars.that.item = prompt(">");
         }
-        if (command.match(/^get item from \"?[0-9A-z]+\"? at \"?[0-9A-z]+\"?$/g) != null) {
+        if (command.match(/^get item from \"?[0-9A-z\s\/\\]+\"? at \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get item from ")[1].split(" at ")[0], false, true);
             let at = transformToUsable(command.split(" at ")[1], false, true);
             if (typeof v != "string") {
