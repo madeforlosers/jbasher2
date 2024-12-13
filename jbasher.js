@@ -95,7 +95,7 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             let type = command.split("with type ")[1];
-            if (!["number", "string","list"].includes(type)) {
+            if (!["number","string","list"].includes(type)) {
                 throwError(6, i);
             }
             vars[name] = { type: type, item: type=="list"?[]:null, isConstant: false };
