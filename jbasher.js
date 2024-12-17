@@ -36,11 +36,11 @@ function throwError(number, im = -1) {
 }
 function detectType(itemtemp) {
     let item = itemtemp.toString();
-    if (item.match(/[0-9]+/g) != null) {
-        return "number";
-    }
     if (item.match(/[A-z\s\/\\]+/g) != null && item.includes("\"")) {
         return "string";
+    }
+    if (item.match(/[0-9]+/g) != null) {
+        return "number";
     }
     if (item.match(/[A-z]+/g) != null && !item.includes("\"")) {
         return "variable";
@@ -50,11 +50,11 @@ function detectType(itemtemp) {
 }
 function detectTypeExcludeVariable(itemtemp) {
     let item = itemtemp.toString();
-    if (item.match(/[0-9]+/g) != null) {
-        return "number";
-    }
     if (item.match(/[A-z]+/g) != null && item.includes("\"")) {
         return "string";
+    }
+    if (item.match(/[0-9]+/g) != null) {
+        return "number";
     }
     if (item.match(/[A-z]+/g) != null && !item.includes("\"")) {
         return vars[item].type;
