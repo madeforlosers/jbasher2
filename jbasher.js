@@ -354,8 +354,9 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             vars.that.type = "list";
-            vars.that.item = transformToUsable(first,false,true);
-            vars.that.item[transformToUsable(second,false,true)] = transformToUsable(third,false,true);
+            let mut = transformToUsable(first,false,true);
+            mut[transformToUsable(second,false,true)] = transformToUsable(third,false,true);
+            vars.that.item = mut;
         }
     } catch (e) {
         console.log(vars);
