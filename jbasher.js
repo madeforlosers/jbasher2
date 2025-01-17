@@ -1,7 +1,16 @@
 const fs = require("fs");
 const ansi = require("m.easyansi");
 const prompt = require("prompt-sync")();
-const file = fs.readFileSync("test.jb2", "utf8").split("\n").map(x => x.trim());
+let outputWarnings = false;
+if(process.argv[2] == undefined || process.argv[2][0]=="-"){
+    console.log("Usage: node jbasher.js [filename] [-w]");
+    console.log("\n-w : output warnings");
+    process.exit()
+}
+if(process.argv.includes("-w")){
+    outputWarnings = true;
+}
+const file = fs.readFileSync(process.argv[2], "utf8").split("\n").map(x => x.trim());
 const defaultState = { type: null, item: null, isConstant: true }; // this wont work for some reason. nodejs why are you like this :'c
 var vars = {
     "that": {
@@ -101,13 +110,13 @@ for (let i = 0; i < file.length; i++) {
                 throwError(6, i);
             }
             vars[name] = { type: type, item: type == "list" ? [] : null, isConstant: false };
-        }
+        }else
         if (command.match(/^spawn \"?[0-9A-z]+\"?$/g)) {
             let item = command.split(/^spawn /g)[1];
             let type = detectTypeExcludeVariable(item);
             vars.that.type = type;
             vars.that.item = transformToUsable(item);
-        }
+        }else
         if (command.match(/^set \"?[0-9A-z\s\/\\]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
             let item = command.split("set ")[1].split(" to")[0];
             let variableToSet = command.split(/^set \"?[0-9A-z\s\/\\]+\"? to /g)[1];
@@ -125,7 +134,7 @@ for (let i = 0; i < file.length; i++) {
             }
             itemUsable = transformToUsable(item);
             vars[variableToSet].item = itemUsable;
-        }
+        }else
         if (command.match(/add \"?[0-9A-z]+\"? by \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("add ")[1].split(" by")[0];
             let second = command.split("by ")[1];
@@ -135,7 +144,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = transformToUsable(first, false, true) + transformToUsable(second, false, true);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/subtract \"?[0-9A-z]+\"? by \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("subtract ")[1].split(" by")[0];
             let second = command.split("by ")[1];
@@ -145,7 +154,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = transformToUsable(first) - transformToUsable(second);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/multiply \"?[0-9A-z]+\"? by \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("multiply ")[1].split(" by")[0];
             let second = command.split("by ")[1];
@@ -155,7 +164,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = transformToUsable(first) * transformToUsable(second);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/divide \"?[0-9A-z]+\"? by \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("divide ")[1].split(" by")[0];
             let second = command.split("by ")[1];
@@ -168,7 +177,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = transformToUsable(first) / transformToUsable(second);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/modulo \"?[0-9A-z]+\"? by \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("modulo ")[1].split(" by")[0];
             let second = command.split("by ")[1];
@@ -178,7 +187,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = transformToUsable(first) % transformToUsable(second);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/if \"?[0-9A-z]+\"?\s(\>\=?|\<\=?|\!\=|\=\=)\s\"?[0-9A-z]+\"?$/g) != null) {
             let compare1 = command.split("if ")[1].split(/\s(\>\=?|\<\=?|\!\=|\=\=)/g)[0];
             let compare2 = command.split(/(\>\=?|\<\=?|\!\=|\=\=)\s/g)[2];
@@ -202,11 +211,11 @@ for (let i = 0; i < file.length; i++) {
             } else {
                 ifLayers++;
             }
-        }
+        }else
         if (command.match(/^ask for input$/g) != null) {
             vars.that.type = "string";
             vars.that.item = prompt(">");
-        }
+        }else
         if (command.match(/^get item from \"?[0-9A-z\s\/\\]+\"? at \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get item from ")[1].split(" at ")[0], false, true);
             let at = transformToUsable(command.split(" at ")[1], false, true);
@@ -218,7 +227,7 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = typeof v == "object" ? "number" : "string";
             vars.that.item = v[at];
-        }
+        }else
         if (command.match(/^get length of \"?[0-9A-z]+\"?$/g) != null) {
             let v = command.split("get length of ")[1];
             if (detectTypeExcludeVariable(v) != "string") {
@@ -226,7 +235,7 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = "number";
             vars.that.item = vars[v]["item"].length;
-        }
+        }else
         if (command.match(/^turn \"?[0-9A-z]+\"? into (upper|lower)case$/g) != null) {
             let v = transformToUsable(command.split("turn ")[1].split(" into")[0], false, true);
             let result = command.split("into ")[1];
@@ -235,7 +244,7 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = "string";
             vars.that.item = result == "uppercase" ? v.toUpperCase() : v.toLowerCase();
-        }
+        }else
         if (command.match(/^get case of \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get case of ")[1], false, true);
             if (typeof v != "string") {
@@ -249,7 +258,7 @@ for (let i = 0; i < file.length; i++) {
             } else {
                 vars.that.item = "mixed";
             }
-        }
+        }else
         if (command.match(/^get location of \"?[0-9A-z]+\"? inside \"?[0-9A-z]+\"?$/g) != null) {
             let it = transformToUsable(command.split("location of ")[1].split(" inside")[0], false, true);
             let ins = transformToUsable(command.split("inside ")[1], false, true);
@@ -258,17 +267,17 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = "number";
             vars.that.item = ins.indexOf(it);
-        }
+        }else
         if (command.match(/^parse \"?[0-9A-z]+\"? as int$/g) != null) {
             let toInt = command.split("parse ")[1].split(" as int")[0];
             vars.that.type = "number";
             vars.that.item = parseInt(transformToUsable(toInt, false, true));
-        }
+        }else
         if (command.match(/^parse \"?[0-9A-z]+\"? as char$/g) != null) {
             let toInt = command.split("parse ")[1].split(" as char")[0];
             vars.that.type = "string";
             vars.that.item = String.fromCharCode(transformToUsable(toInt, false, true));
-        }
+        }else
         if (command.match(/^while \"?[0-9A-z]+\"?\s(\>\=?|\<\=?|\!\=|\=\=)\s\"?[0-9A-z]+\"?$/g) != null) {
             let compare1 = command.split("while ")[1].split(/\s(\>\=?|\<\=?|\!\=|\=\=)\s/g)[0];
             let compare2 = command.split(/(\>\=?|\<\=?|\!\=|\=\=)\s/g)[2];
@@ -294,19 +303,19 @@ for (let i = 0; i < file.length; i++) {
                 whileLayers.pop();
                 continue;
             }
-        }
+        }else
         if (command.match(/^endwhile$/g) != null) {
             if (whileLayers.length == 0) {
                 throwError(4, i);
             }
             i = whileLayers[whileLayers.length - 1][0] - 1;
             continue;
-        }
+        }else
         if (command.match(/^get type of \"?[0-9A-z]+\"?$/g) != null) {
             let item = command.split("get type of ")[1];
             vars.that.type = "string";
             vars.that.item = `"${detectTypeExcludeVariable(item)}"`;
-        }
+        }else
         if (command.match(/^repeat \"?.+\"? an \"?[0-9A-z]+\"? amount of times$/g) != null) {
             let string = command.split(/^repeat\s/g)[1].split(/\san\s/g)[0];
             let amount = command.split(/an\s/g)[1].split(/\samount of times$/g)[0];
@@ -315,7 +324,7 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = "string";
             vars.that.item = transformToUsable(string, false, true).repeat(transformToUsable(amount, false, true));
-        }
+        }else
         if (command.match(/^output\s((type|inline)\s)?\"?.+\"?$/g) != null) {
             if (command.match(/^output type\s/g) != null) {
                 console.log(detectTypeExcludeVariable(command.split(/^output type\s/g)[1]));
@@ -326,7 +335,7 @@ for (let i = 0; i < file.length; i++) {
                 let item = command.split(/^output /)[1];
                 console.log(transformToUsable(item));
             }
-        }
+        }else
         if (command.match(/^spawn random number between \"?[0-9A-z]+\"? and \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("between ")[1].split(" and")[0];
             let second = command.split("and ")[1];
@@ -338,7 +347,7 @@ for (let i = 0; i < file.length; i++) {
             let mathed = Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
             vars.that.type = "number";
             vars.that.item = mathed;
-        }
+        }else
         if (command.match(/^push \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("push ")[1].split(" to")[0];
             let second = command.split("to ")[1];
@@ -347,7 +356,7 @@ for (let i = 0; i < file.length; i++) {
             }
             vars.that.type = "list";
             vars.that.item = [...transformToUsable(second, false, true), transformToUsable(first, false, true)];
-        }
+        }else
         if (command.match(/^change item in \"?[0-9A-z]+\"? at index \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("in ")[1].split(" at")[0];
             let second = command.split("index ")[1].split(" to")[0];
@@ -359,7 +368,7 @@ for (let i = 0; i < file.length; i++) {
             let mut = transformToUsable(first, false, true);
             mut[transformToUsable(second, false, true)] = transformToUsable(third, false, true);
             vars.that.item = mut;
-        }
+        }else
         if (command.match(/^create function \"?[0-9A-z]+\"?( that requires \"?[A-z, ]+\"?)?$/g) != null) {
             let name = command.split("function ")[1].split(" that")[0];
             let args = [];
@@ -374,7 +383,7 @@ for (let i = 0; i < file.length; i++) {
             continue;
             //vars.that.type = "number";
             //vars.that.item = parseInt(transformToUsable(toInt, false, true));
-        }
+        }else
         if (command.match(/^endfunc$/g) != null) {
             if (functionLayers.length == 0) {
                 throwError(4, i);
@@ -389,7 +398,7 @@ for (let i = 0; i < file.length; i++) {
             vars[that] = null;
             functionLayers.pop();
             continue;
-        }
+        }else
         if (command.match(/^return( \"?[0-9A-z]+\"?)?$/g) != null) {
             if (functionLayers.length == 0) {
                 throwError(4, i);
@@ -407,7 +416,7 @@ for (let i = 0; i < file.length; i++) {
             i = functionLayers[functionLayers.length - 1][0];
             functionLayers.pop();
             continue;
-        }
+        }else
         if (command.match(/^call function \"?[0-9A-z]+\"?( with arguments [\"0-9A-z, ]+)?$/g) != null) {
             let name = command.split("function ")[1].split(" with")[0];
             let args = [];
@@ -438,6 +447,11 @@ for (let i = 0; i < file.length; i++) {
 
             //vars.that.type = "number";
             //vars.that.item = parseInt(transformToUsable(toInt, false, true));
+
+        }else{
+            if(outputWarnings && !["endif"].includes(command)){
+                console.log(`[WARNING]: COMMAND SKIPPED AT LINE ${i}: ${command}`);
+            }
         }
 
     } catch (e) {
