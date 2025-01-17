@@ -12,6 +12,7 @@ var vars = {
 };
 var whileLayers = [];
 var ifLayers = 0;
+var functionLayers = [];
 function throwError(number, im = -1) {
     console.log(
         `${ansi.colorTextMode(31)}!! ERROR ${number > 0 ? "IN FILE" : "IN INTERPRETER"}: ${ansi.colorTextMode(33)}${[
@@ -26,6 +27,7 @@ function throwError(number, im = -1) {
             "CANNOT DETERMINE TYPE OF VARIABLE",
             "TRIED TO ESCAPE BOUNDS OF FILE",
             "DIVIDE BY 0",
+            "VARIABLE ALREADY EXISTS",
         ][Math.abs(number)]} ${ansi.resetModes()} \n\n` +
         (im != -1 ?
             `At line ${im + 1}: \n${file[im]}`
@@ -36,7 +38,7 @@ function throwError(number, im = -1) {
 }
 function detectType(itemtemp) {
     let item = itemtemp.toString();
-    if (item.match(/[A-z0-9\s\/\\]+/g) != null && item.includes("\"")) {
+    if ( /* item.match(/[A-z0-9\s\/\\]+/g) != null &&  */ item.includes("\"")) { // idk if this will create bugs in the future
         return "string";
     }
     if (item.match(/[0-9]+/g) != null) {
@@ -95,10 +97,10 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             let type = command.split("with type ")[1];
-            if (!["number","string","list"].includes(type)) {
+            if (!["number", "string", "list"].includes(type)) {
                 throwError(6, i);
             }
-            vars[name] = { type: type, item: type=="list"?[]:null, isConstant: false };
+            vars[name] = { type: type, item: type == "list" ? [] : null, isConstant: false };
         }
         if (command.match(/^spawn \"?[0-9A-z]+\"?$/g)) {
             let item = command.split(/^spawn /g)[1];
@@ -208,13 +210,13 @@ for (let i = 0; i < file.length; i++) {
         if (command.match(/^get item from \"?[0-9A-z\s\/\\]+\"? at \"?[0-9A-z]+\"?$/g) != null) {
             let v = transformToUsable(command.split("get item from ")[1].split(" at ")[0], false, true);
             let at = transformToUsable(command.split(" at ")[1], false, true);
-            if (!["string","object"].includes(typeof v)) {
+            if (!["string", "object"].includes(typeof v)) {
                 throwError(1, i);
             }
             if (typeof at != "number") {
                 throwError(1, i);
             }
-            vars.that.type = typeof v=="object"?"number":"string";
+            vars.that.type = typeof v == "object" ? "number" : "string";
             vars.that.item = v[at];
         }
         if (command.match(/^get length of \"?[0-9A-z]+\"?$/g) != null) {
@@ -344,7 +346,7 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             vars.that.type = "list";
-            vars.that.item = [...transformToUsable(second,false,true),transformToUsable(first,false,true)];
+            vars.that.item = [...transformToUsable(second, false, true), transformToUsable(first, false, true)];
         }
         if (command.match(/^change item in \"?[0-9A-z]+\"? at index \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("in ")[1].split(" at")[0];
@@ -354,10 +356,90 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             vars.that.type = "list";
-            let mut = transformToUsable(first,false,true);
-            mut[transformToUsable(second,false,true)] = transformToUsable(third,false,true);
+            let mut = transformToUsable(first, false, true);
+            mut[transformToUsable(second, false, true)] = transformToUsable(third, false, true);
             vars.that.item = mut;
         }
+        if (command.match(/^create function \"?[0-9A-z]+\"?( that requires \"?[A-z, ]+\"?)?$/g) != null) {
+            let name = command.split("function ")[1].split(" that")[0];
+            let args = [];
+            if (command.includes("that requires")) {
+                args = command.split("requires ")[1].split(",").map(x => x.trim());
+            }
+            // console.log(args);
+            vars[name] = { type: "function", item: { place: i, args: args }, isConstant: true }
+            while (file[i] != "endfunc") {
+                i++;
+            }
+            continue;
+            //vars.that.type = "number";
+            //vars.that.item = parseInt(transformToUsable(toInt, false, true));
+        }
+        if (command.match(/^endfunc$/g) != null) {
+            if (functionLayers.length == 0) {
+                throwError(4, i);
+            }
+            if (vars[functionLayers[functionLayers.length - 1][1]].type != "function") {
+                throwError(1);
+            }
+            for (va of vars[functionLayers[functionLayers.length - 1][1]].item.args) {
+                vars[va] = undefined;
+            }
+            i = functionLayers[functionLayers.length - 1][0];
+            vars[that] = null;
+            functionLayers.pop();
+            continue;
+        }
+        if (command.match(/^return( \"?[0-9A-z]+\"?)?$/g) != null) {
+            if (functionLayers.length == 0) {
+                throwError(4, i);
+            }
+            if (vars[functionLayers[functionLayers.length - 1][1]].type != "function") {
+                throwError(1);
+            }
+            if (command.match(/^return \"?[0-9A-z]+\"?$/g) != null) {
+                vars.that.type = detectTypeExcludeVariable(command.split(" ")[1]);
+                vars.that.item = transformToUsable(command.split(" ")[1], false, true);
+            }
+            for (va of vars[functionLayers[functionLayers.length - 1][1]].item.args) {
+                vars[va] = undefined;
+            }
+            i = functionLayers[functionLayers.length - 1][0];
+            functionLayers.pop();
+            continue;
+        }
+        if (command.match(/^call function \"?[0-9A-z]+\"?( with arguments [\"0-9A-z, ]+)?$/g) != null) {
+            let name = command.split("function ")[1].split(" with")[0];
+            let args = [];
+            if (vars[name].type != "function") {
+                throwError(1);
+            }
+            if (command.includes("with arguments")) {
+                args = command.split("arguments ")[1];
+                if (args.includes(",")) {
+                    args = args.split(",").map(x => transformToUsable(x.trim(), false, true));
+                } else {
+                    args = [transformToUsable(args.trim(),false,true)]
+                }
+                let inc = 0;
+                for (funcArgs of vars[name].item.args) {
+                    if (vars[funcArgs] != undefined) {
+                        throwError(11);
+                    }
+                    vars[funcArgs] = { type: "number", item: args[inc], isConstant: false, isFuncLocal: true }
+                    inc++;
+                }
+            }
+
+
+
+            functionLayers.push([i, name]);
+            i = vars[name].item.place;
+
+            //vars.that.type = "number";
+            //vars.that.item = parseInt(transformToUsable(toInt, false, true));
+        }
+
     } catch (e) {
         console.log(vars);
         console.log(e);

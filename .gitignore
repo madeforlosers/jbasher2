@@ -4,6 +4,6 @@ package-lock.json
 package.json
 node_modules/
 col.js
-.gitignore
 co.js
 g.jb2
+.gitignore
