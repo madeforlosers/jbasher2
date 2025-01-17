@@ -5,7 +5,7 @@ let outputWarnings = false;
 if (process.argv[2] == undefined || process.argv[2][0] == "-") {
     console.log("Usage: node jbasher.js [filename] [-w]");
     console.log("\n-w : output warnings");
-    process.exit()
+    process.exit();
 }
 if (process.argv.includes("-w")) {
     outputWarnings = true;
@@ -165,7 +165,7 @@ for (let i = 0; i < file.length; i++) {
                 throwError(1, i);
             }
             if (transformToUsable(second, false, true) == 0) {
-                throwError(10, i)
+                throwError(10, i);
             }
             let mathed = transformToUsable(first) / transformToUsable(second);
             vars.that.type = "number";
@@ -335,7 +335,7 @@ for (let i = 0; i < file.length; i++) {
         } else if (command.match(/^change item in \"?[0-9A-z]+\"? at index \"?[0-9A-z]+\"? to \"?[0-9A-z]+\"?$/g) != null) {
             let first = command.split("in ")[1].split(" at")[0];
             let second = command.split("index ")[1].split(" to")[0];
-            let third = command.split("to ")[1]
+            let third = command.split("to ")[1];
             if (detectTypeExcludeVariable(first) != "list" || detectTypeExcludeVariable(second) != "number" || detectTypeExcludeVariable(third) != "number") {
                 throwError(1, i);
             }
@@ -396,7 +396,7 @@ for (let i = 0; i < file.length; i++) {
                 if (args.includes(",")) {
                     args = args.split(",").map(x => transformToUsable(x.trim(), false, true));
                 } else {
-                    args = [transformToUsable(args.trim(), false, true)]
+                    args = [transformToUsable(args.trim(), false, true)];
                 }
                 let inc = 0;
                 for (funcArgs of vars[name].item.args) {
