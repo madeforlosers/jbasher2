@@ -92,7 +92,6 @@ function transformToUsable(item, keepQuotes = false, dontcleartemp = false) {
     }
     return item;
 }
-//console.time("debug");
 for (let i = 0; i < file.length; i++) {
     try {
         if (i >= file.length) {
@@ -350,14 +349,11 @@ for (let i = 0; i < file.length; i++) {
             if (command.includes("that requires")) {
                 args = command.split("requires ")[1].split(",").map(x => x.trim());
             }
-            // console.log(args);
             vars[name] = { type: "function", item: { place: i, args: args }, isConstant: true }
             while (file[i] != "endfunc") {
                 i++;
             }
             continue;
-            //vars.that.type = "number";
-            //vars.that.item = parseInt(transformToUsable(toInt, false, true));
         } else if (command.match(/^endfunc$/g) != null) {
             if (functionLayers.length == 0) {
                 throwError(4, i);
@@ -411,25 +407,16 @@ for (let i = 0; i < file.length; i++) {
                     inc++;
                 }
             }
-
-
-
             functionLayers.push([i, name]);
             i = vars[name].item.place;
-
-            //vars.that.type = "number";
-            //vars.that.item = parseInt(transformToUsable(toInt, false, true));
-
         } else {
             if (outputWarnings && !["endif"].includes(command)) {
                 console.log(`[WARNING]: COMMAND SKIPPED AT LINE ${i}: ${command}`);
             }
         }
-
     } catch (e) {
         console.log(vars);
         console.log(e);
         throwError(0, i);
     }
 }
-//console.timeEnd("debug");
