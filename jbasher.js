@@ -90,6 +90,9 @@ function transformToUsable(item, keepQuotes = false, dontcleartemp = false) {
     if (detectType(item) == "number") {
         return parseInt(item);
     }
+    if (detectType(item) == "list") {
+        return v[item].item;
+    }
     return item;
 }
 for (let i = 0; i < file.length; i++) {
@@ -218,7 +221,7 @@ for (let i = 0; i < file.length; i++) {
             vars.that.item = v[at];
         } else if (command.match(/^get length of \"?[0-9A-z]+\"?$/g) != null) {
             let v = command.split("get length of ")[1];
-            if (detectTypeExcludeVariable(v) != "string") {
+            if (detectTypeExcludeVariable(v) != "string" && detectTypeExcludeVariable(v) != "list") {
                 throwError(1, i);
             }
             vars.that.type = "number";
@@ -256,6 +259,11 @@ for (let i = 0; i < file.length; i++) {
             let toInt = command.split("parse ")[1].split(" as int")[0];
             vars.that.type = "number";
             vars.that.item = parseInt(transformToUsable(toInt, false, true));
+        } else if (command.match(/^get the fractional part of \"?[0-9A-z]+\"?$/g) != null) {
+            let toFrac = command.split("fractional part of ")[1];
+            let value = transformToUsable(toFrac, false, true);
+            vars.that.type = "number";
+            vars.that.item = value - parseInt(value);
         } else if (command.match(/^parse \"?[0-9A-z]+\"? as char$/g) != null) {
             let toInt = command.split("parse ")[1].split(" as char")[0];
             vars.that.type = "string";
@@ -409,6 +417,41 @@ for (let i = 0; i < file.length; i++) {
             }
             functionLayers.push([i, name]);
             i = vars[name].item.place;
+        } else if (command.match(/^get the square root of \"?[0-9A-z]+\"?$/g)) {
+            let item = command.split(/root of /g)[1];
+            let type = detectTypeExcludeVariable(item);
+            if (type != "number") {
+                throwError(1, i);
+            }
+            if (transformToUsable(item, false, true) < 0) {
+                throwError(5, i);
+            }
+            vars.that.type = type;
+            vars.that.item = Math.sqrt(transformToUsable(item, false, true));
+        } else if (command.match(/^get the absolute value of \"?[0-9A-z]+\"?$/g)) {
+            let item = command.split(/value of /g)[1];
+            let type = detectTypeExcludeVariable(item);
+            if (type != "number") {
+                throwError(1, i);
+            }
+            vars.that.type = "number";
+            vars.that.item = Math.abs(transformToUsable(item, false, true));
+        } else if (command.match(/^get the maximum value in \"?[0-9A-z]+\"?$/g)) {
+            let item = command.split(/value in /g)[1];
+            let type = detectTypeExcludeVariable(item);
+            if (type != "list") {
+                throwError(1, i);
+            }
+            vars.that.type = "number";
+            vars.that.item = Math.max(...transformToUsable(item, false, true));
+        } else if (command.match(/^get the minimum value in \"?[0-9A-z]+\"?$/g)) {
+            let item = command.split(/value in /g)[1];
+            let type = detectTypeExcludeVariable(item);
+            if (type != "list") {
+                throwError(1, i);
+            }
+            vars.that.type = "number";
+            vars.that.item = Math.min(...transformToUsable(item, false, true));
         } else {
             if (outputWarnings && !["endif"].includes(command)) {
                 console.log(`[WARNING]: COMMAND SKIPPED AT LINE ${i}: ${command}`);
