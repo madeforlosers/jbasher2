@@ -316,7 +316,7 @@ for (let i = 0; i < file.length; i++) {
                 console.log(detectTypeExcludeVariable(command.split(/^output type\s/g)[1]));
             } else if (command.match(/^output inline\s/g) != null) {
                 let item = command.split(/^output inline\s/g)[1];
-                process.stdout.write(transformToUsable(item));
+                process.stdout.write(transformToUsable(item).toString());
             } else {
                 let item = command.split(/^output /)[1];
                 console.log(transformToUsable(item));
